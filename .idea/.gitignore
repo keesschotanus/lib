@@ -13,3 +13,5 @@ dataSources.xml
 dynamic.xml
 sqlDataSources.xml
 uiDesigner.xml
+
+/sonarlint/**/*
