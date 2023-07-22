@@ -30,14 +30,14 @@ class CodeDescriptionTest {
 
     @Test()
     void testConstructor() {
-        final CodeDescription codeDescription = new CodeDescription(1, "Hydrogen");
-        assertEquals(1, codeDescription.getCode());
-        assertEquals("Hydrogen", codeDescription.getDescription());
+        final CodeDescription<Integer> codeDescription = new CodeDescription<>(1, "Hydrogen");
+        assertEquals(1, codeDescription.code());
+        assertEquals("Hydrogen", codeDescription.description());
     }
 
     @Test()
     void testToString() {
-        final CodeDescription codeDescription = new CodeDescription(null, "Helium");
+        final CodeDescription<Integer> codeDescription = new CodeDescription<>(null, "Helium");
         assertEquals("Helium", codeDescription.toString());
     }
 

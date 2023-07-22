@@ -25,49 +25,28 @@ import java.util.Objects;
 /**
  * Abstraction of an immutable code and description pair.
  * <br>A collection of these code and description pairs could be used to fill a combo box for example.
+ * @param <T> The type of the code.
+ * @param code Code.
+ * @param description Description field.
  */
-public class CodeDescription {
-
-    /**
-     * Code.
-     */
-    private final Object code;
-
-    /**
-     * Description field.
-     */
-    private final String description;
+public record CodeDescription<T extends Comparable<?>>(T code, String description) {
 
     /**
      * Constructs a code and description pair from the supplied code and description.
+     *
      * @param code The code.
      * @param description The description.
      * @throws NullPointerException When the supplied description is null.
      */
-    public CodeDescription(final Object code, final String description) {
+    public CodeDescription(final T code, final String description) {
         this.code = code;
         this.description = Objects.requireNonNull(description);
     }
 
     /**
-     * Gets the code.
-     * @return Code.
-     */
-    public Object getCode() {
-        return this.code;
-    }
-
-    /**
-     * Gets the description.
-     * @return Description.
-     */
-    public String getDescription() {
-        return this.description;
-    }
-
-    /**
      * Gets a String representation of this code description pair.
      * <br>Since this method could be used from within a Swing component it simply returns the description.
+     *
      * @return Description for this code description pair.
      */
     public String toString() {
