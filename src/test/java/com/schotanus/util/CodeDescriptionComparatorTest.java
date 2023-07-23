@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
- * Tests for {@link CodeDescriptionComparator}.
+ * Unit tests for {@link CodeDescriptionComparator}.
  */
 class CodeDescriptionComparatorTest {
 

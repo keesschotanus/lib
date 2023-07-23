@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
- * Tests for {@link CResourceBundle}.
+ * Unit tests for {@link CResourceBundle}.
  */
 class CResourceBundleTest {
 

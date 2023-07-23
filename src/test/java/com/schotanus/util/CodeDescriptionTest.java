@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
- * Tests for {@link CodeDescription}.
+ * Unit tests for {@link CodeDescription}.
  */
 class CodeDescriptionTest {
 
