@@ -75,6 +75,87 @@ public class CResourceBundle {
     private static final Logger logger = LoggerFactory.getLogger(CResourceBundle.class);
 
     /**
+     * Gets the localized message from the resource bundle with the supplied resourceBundleName, using the supplied messageKey.
+     * @param locale The locale used to translate the message.
+     *  <br>When null is supplied, the default locale will be used.
+     * @param resourceBundleName The name of the {@link ResourceBundle} that contains the message to be localized.
+     * @param messageKey Key of the message to find and localize.
+     * @param messageArguments The message arguments that will be inserted into the localized message.
+     * @return The localized message for the supplied locale.
+     *  <br>When the localized message could not be retrieved from the resource bundle, the message key is returned hence this
+     *  method never throws a {@link MissingResourceException}.
+     * @throws MissingResourceException When no resource bundle could be found with the supplied resource bundle name.
+     * @throws NullPointerException When the supplied resourceBundleName is null.
+     */
+    public static String getLocalizedMessage(
+            final Locale locale,
+            final String resourceBundleName,
+            final String messageKey,
+            final Object... messageArguments) {
+
+        final ResourceBundle resourceBundle = ResourceBundle.getBundle(
+                Objects.requireNonNull(resourceBundleName), Objects.requireNonNullElse(locale, Locale.getDefault()));
+        return getLocalizedMessage(resourceBundle, messageKey, messageArguments);
+    }
+
+    /**
+     * Gets the localized message from the supplied resourceBundle, using the supplied messageKey.
+     * @param resourceBundle The ResourceBundle that contains the message to be localized.
+     * @param messageKey Key of the message to find and localize.
+     * @param messageArguments The message arguments that will be inserted into the localized message.
+     * @return The localized message for the supplied messageKey.
+     *  <br>When the localized message could not be retrieved from the resource bundle, the message key is returned hence this
+     *  method never throws a {@link MissingResourceException}.
+     * @throws NullPointerException When the supplied resourceBundle is null.
+     */
+    public static String getLocalizedMessage(
+            final ResourceBundle resourceBundle,
+            final String messageKey,
+            final Object... messageArguments) {
+        Objects.requireNonNull(resourceBundle);
+
+        String message;
+        try {
+            message = resourceBundle.getString(messageKey);
+            message = CResourceBundle.format(resourceBundle.getLocale(), message, messageArguments);
+        } catch (final MissingResourceException exception) {
+            logger.warn(String.format("Could not locate message:key=%s, bundle=%s",
+                    messageKey, resourceBundle), exception);
+            message = messageKey;
+        }
+
+        return message;
+    }
+
+    /**
+     * Formats a message based on the supplied message pattern and message arguments.
+     * @param locale The locale to us to format the message.
+     *  When null, the default locale will be used.
+     * @param messagePattern The message pattern.
+     *  <br>For example: Processing record {0} of {1}.
+     * @param messageArguments The arguments that must be inserted into the message pattern.
+     * @return The localized compound message or the supplied messagePattern when the messageArguments are null.
+     * @throws NullPointerException When the supplied messagePattern is null.
+     */
+    public static String format(final Locale locale, final String messagePattern, final Object... messageArguments) {
+        Objects.requireNonNull(messagePattern);
+
+        String result = messagePattern;
+
+        /* Not passing any arguments can be performed in two distinct ways
+         * 1) Passing <code>null</code> or <code>(Object []) null</code>, causes messageArguments to be null.
+         * 2) Passing <code>(Object) null)</code>, causes messageArguments to be an array with a single null value
+         */
+        if (messageArguments != null && !(messageArguments.length == 1 && messageArguments[0] == null)) {
+            final MessageFormat messageFormat = new MessageFormat(messagePattern);
+            messageFormat.setLocale(Objects.requireNonNullElse(locale, Locale.getDefault()));
+            result = messageFormat.format(messageArguments);
+        }
+        // ToDo check if message can contain illegal argument, like passing a string where a date is expected
+        return result;
+    }
+
+    /**
      * Constructs this bundle using the supplied resourceBundleName and the default locale.
      * <br>All subsequent bundles added using {@link #addResourceBundle(String)} will use the same (default) locale.
      * @param resourceBundleName Name of the resource bundle file.
@@ -323,7 +404,7 @@ public class CResourceBundle {
 
         String result = getString(key);
         if (result != null) {
-            result = format(result, arguments);
+            result = CResourceBundle.format(this.locale, result, arguments);
         }
 
         return result;
@@ -372,29 +453,17 @@ public class CResourceBundle {
     }
 
     /**
-     * Constructs a compound message based on the message pattern and the supplied arguments.
+     * Formats a message based on the supplied message pattern and message arguments.
      * @param messagePattern The message pattern.
      *  <br>For example: Processing record {0} of {1}.
      * @param messageArguments The arguments that must be inserted into the message pattern.
-     * @return The localized compound message or the supplied messagePattern when the messageArguments are null.
-     * @throws NullPointerException When the supplied messagePattern is null.
+     * @return The localized message or the supplied message pattern when the message arguments are null.
+     * @throws NullPointerException When the supplied message pattern is null.
      */
     public String format(final String messagePattern, final Object... messageArguments) {
         Objects.requireNonNull(messagePattern);
 
-        String result = messagePattern;
-
-        /* Not passing any arguments can be performed in two distinct ways
-         * 1) Passing <code>null</code> or <code>(Object []) null</code>, causes messageArguments to be null.
-         * 2) Passing <code>(Object) null)</code>, causes messageArguments to be an array with a single null value
-         */
-        if (messageArguments != null && !(messageArguments.length == 1 && messageArguments[0] == null)) {
-            final MessageFormat messageFormat = new MessageFormat(messagePattern);
-            messageFormat.setLocale(this.locale);
-            result = messageFormat.format(messageArguments);
-        }
-
-        return result;
+        return CResourceBundle.format(this.locale, messagePattern, messageArguments);
     }
 
     /**

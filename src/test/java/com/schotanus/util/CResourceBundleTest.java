@@ -22,8 +22,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,6 +51,31 @@ class CResourceBundleTest {
     void testConstructorWithNonExistingBundle() {
         Assertions.assertThrows(MissingResourceException.class,
             () -> new CResourceBundle("com.schotanus.util.nonExisting"));
+    }
+
+    @Test
+    void testGetLocalizedMessageWithBundleName() {
+        // Test getting an existing message
+        final String bundleName = CResourceBundleTest.class.getName();
+        assertEquals("Bonjour Patrick, comment ça va?",
+                CResourceBundle.getLocalizedMessage(Locale.FRANCE, bundleName,"hello", "Patrick"));
+
+        // Test getting a non-existing message
+        assertEquals("doesNotExist",
+                CResourceBundle.getLocalizedMessage(Locale.FRANCE, bundleName,"doesNotExist" ));
+    }
+
+    @Test
+    void testGetLocalizedMessageWithResourceBundle() {
+        // Test getting an existing message
+        final ResourceBundle resourceBundle =
+                ResourceBundle.getBundle("com.schotanus.util.CResourceBundleTest", Locale.getDefault());
+        assertEquals("Hello Patrick, how are you today?",
+                CResourceBundle.getLocalizedMessage(resourceBundle,"hello", "Patrick"));
+
+        // Test getting a non-existing message
+        assertEquals("doesNotExist",
+                CResourceBundle.getLocalizedMessage(resourceBundle,"doesNotExist" ));
     }
 
     @Test
