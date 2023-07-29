@@ -18,7 +18,10 @@
 
 package com.schotanus.util;
 
+import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
+import java.util.Objects;
 
 
 /**
@@ -37,11 +40,13 @@ public class CodeDescriptionComparator<T extends Comparable<?>> implements Compa
      */
     private final boolean ascending;
 
+    private final Collator collator;
+
     /**
      * Creates this comparator, sorting on description in ascending order.
      */
     public CodeDescriptionComparator() {
-        this(true, true);
+        this(true, true, null);
     }
 
     /**
@@ -49,17 +54,29 @@ public class CodeDescriptionComparator<T extends Comparable<?>> implements Compa
      * @param sortOnDescription True to sort on description, false to sort on code.
      */
     public CodeDescriptionComparator(final boolean sortOnDescription) {
-        this(sortOnDescription, true);
+        this(sortOnDescription, true, null);
+    }
+
+    /**
+     * Creates a comparator, sorting on either code or description and either ascending or descending order.
+     * @param sortOnDescription True to sort on description, false to sort on code.
+     * @param ascending True to sort ascending, false to sort descending.
+     */
+    public CodeDescriptionComparator(final boolean sortOnDescription, final boolean ascending) {
+        this(sortOnDescription, ascending, null);
     }
 
     /**
      * Creates a comparator, sorting on either code or description and either ascending or descending other.
      * @param sortOnDescription True to sort on description, false to sort on code.
      * @param ascending True to sort ascending, false to sort descending.
+     * @param collator The collator used to compare code and description.
+     *  When null, a collator using the default locale is used.
      */
-    public CodeDescriptionComparator(final boolean sortOnDescription, final boolean ascending) {
+    public CodeDescriptionComparator(final boolean sortOnDescription, final boolean ascending, final Collator collator) {
         this.sortOnDescription = sortOnDescription;
         this.ascending = ascending;
+        this.collator = Objects.requireNonNullElse(collator, Collator.getInstance(Locale.getDefault()));
     }
 
     /**
@@ -73,7 +90,7 @@ public class CodeDescriptionComparator<T extends Comparable<?>> implements Compa
     public int compare(final CodeDescription<T> left, final CodeDescription<T> right) {
         int result;
         if (sortOnDescription) {
-            result = left.description().compareTo(right.description());
+            result = collator.compare(left.description(), right.description());
         } else {
             if (left.code() == null && right.code() == null) {
                 result = 0;

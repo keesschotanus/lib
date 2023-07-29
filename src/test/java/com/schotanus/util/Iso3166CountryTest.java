@@ -94,7 +94,7 @@ final class Iso3166CountryTest {
         final List<CodeDescription<String>> codeDescriptions = Iso3166Country.getCodeDescriptions(dutchLocale, null);
         // Get the code/descriptions and test if the first and last country are the correct ones
         assertEquals("Afghanistan", codeDescriptions.get(0).description());
-        // ToDo assertEquals("Zwitserland", codeDescriptions.get(codeDescriptions.size() - 1).description());
+        assertEquals("Zwitserland", codeDescriptions.get(codeDescriptions.size() - 1).description());
     }
 
     @Test
