@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
- * Unit test class for class {@link CLocale}.
+ * Unit tests for class {@link CLocale}.
  */
 final class CLocaleTest {
 
