@@ -23,6 +23,6 @@ package com.schotanus.science.physics.astronomy;
  */
 public enum Planet {
 
-    MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE;
+    MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE
 
 }
