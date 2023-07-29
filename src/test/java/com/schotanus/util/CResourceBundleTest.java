@@ -235,6 +235,9 @@ class CResourceBundleTest {
         // Test with missing arguments
         assertEquals("Record {0} of {1}", bundle.format("Record {0} of {1}", (Object[]) null));
         assertEquals("Record {0} of {1}", bundle.format("Record {0} of {1}", (Object) null));
+
+        // Test with pattern that expects a date but we pass a String
+        assertEquals("Date: {0,date}", bundle.format("Date: {0,date}", new java.util.Date().toString()));
     }
 
     @Test
@@ -242,4 +245,5 @@ class CResourceBundleTest {
         assertEquals("[com.schotanus.util.top,com.schotanus.util.middle,com.schotanus.util.bottom]",
                 bundle.toString());
     }
+
 }

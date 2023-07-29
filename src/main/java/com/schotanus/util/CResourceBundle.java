@@ -94,7 +94,7 @@ public class CResourceBundle {
             final Object... messageArguments) {
 
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(
-                Objects.requireNonNull(resourceBundleName), Objects.requireNonNullElse(locale, Locale.getDefault()));
+                Objects.requireNonNull(resourceBundleName), CLocale.getLocaleOrDefault(locale));
         return getLocalizedMessage(resourceBundle, messageKey, messageArguments);
     }
 
@@ -119,8 +119,7 @@ public class CResourceBundle {
             message = resourceBundle.getString(messageKey);
             message = CResourceBundle.format(resourceBundle.getLocale(), message, messageArguments);
         } catch (final MissingResourceException exception) {
-            logger.warn(String.format("Could not locate message:key=%s, bundle=%s",
-                    messageKey, resourceBundle), exception);
+            logger.atWarn().log("Could not locate message:key={}, bundle={}", messageKey, resourceBundle);
             message = messageKey;
         }
 
@@ -148,10 +147,14 @@ public class CResourceBundle {
          */
         if (messageArguments != null && !(messageArguments.length == 1 && messageArguments[0] == null)) {
             final MessageFormat messageFormat = new MessageFormat(messagePattern);
-            messageFormat.setLocale(Objects.requireNonNullElse(locale, Locale.getDefault()));
-            result = messageFormat.format(messageArguments);
+            messageFormat.setLocale(CLocale.getLocaleOrDefault(locale));
+            try {
+                result = messageFormat.format(messageArguments);
+            } catch (final IllegalArgumentException exception) {
+                // Happens for example with "{0,date}" and a String is passed instead of a Date
+                logger.atWarn().log("Could not format the message using: {}", messageFormat);
+            }
         }
-        // ToDo check if message can contain illegal argument, like passing a string where a date is expected
         return result;
     }
 
