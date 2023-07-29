@@ -42,36 +42,38 @@ class CodeDescriptionComparatorTest {
         elements.add(new CodeDescription<>(3, "Lithium"));
         elements.add(new CodeDescription<>(null, "Null2"));
         elements.add(new CodeDescription<>(4, "Beryllium"));
+        // Add Calcium to verify we can sort numerically on code
+        elements.add(new CodeDescription<>(20, "Calcium"));
     }
 
     @Test()
     void testCompareUsingDefaults() {
         elements.sort(new CodeDescriptionComparator<>());
-        assertEquals("[Beryllium, Helium, Hydrogen, Lithium, Null1, Null2]", elements.toString());
+        assertEquals("[Beryllium, Calcium, Helium, Hydrogen, Lithium, Null1, Null2]", elements.toString());
     }
 
     @Test()
     void testCompareOnDescription() {
         elements.sort(new CodeDescriptionComparator<>(true));
-        assertEquals("[Beryllium, Helium, Hydrogen, Lithium, Null1, Null2]", elements.toString());
+        assertEquals("[Beryllium, Calcium, Helium, Hydrogen, Lithium, Null1, Null2]", elements.toString());
     }
 
     @Test()
     void testCompareOnDescriptionDescending() {
         elements.sort(new CodeDescriptionComparator<>(true, false));
-        assertEquals("[Null2, Null1, Lithium, Hydrogen, Helium, Beryllium]", elements.toString());
+        assertEquals("[Null2, Null1, Lithium, Hydrogen, Helium, Calcium, Beryllium]", elements.toString());
     }
 
     @Test()
     void testCompareOnCodeAscending() {
         elements.sort(new CodeDescriptionComparator<>(false, true));
-        assertEquals("[Null1, Null2, Hydrogen, Helium, Lithium, Beryllium]", elements.toString());
+        assertEquals("[Null1, Null2, Hydrogen, Helium, Lithium, Beryllium, Calcium]", elements.toString());
     }
 
     @Test()
     void testCompareOnCodeDescending() {
         elements.sort(new CodeDescriptionComparator<>(false, false));
-        assertEquals("[Beryllium, Lithium, Helium, Hydrogen, Null1, Null2]", elements.toString());
+        assertEquals("[Calcium, Beryllium, Lithium, Helium, Hydrogen, Null1, Null2]", elements.toString());
     }
 
     @Test()
