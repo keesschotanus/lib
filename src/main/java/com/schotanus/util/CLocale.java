@@ -41,6 +41,15 @@ public final class CLocale {
     }
 
     /**
+     * When the supplied locale is null, the default locale is used, otherwise the supplied locale is used.
+     * @param locale The locale to use.
+     * @return The supplied locale when non-null, otherwise the default locale.
+     */
+    public static Locale getLocaleOrDefault(final Locale locale) {
+        return locale == null ? Locale.getDefault() : locale;
+    }
+
+    /**
      * Creates a Locale from the supplied String locale.
      * Note: This method does not support script and language extension.
      * @param locale String representation of a Locale.

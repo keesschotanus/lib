@@ -34,6 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class CLocaleTest {
 
     @Test
+    void testGetLocaleOrDefault() {
+        // Test getting the default locale
+        assertEquals(Locale.getDefault(), CLocale.getLocaleOrDefault(null));
+
+        // Test getting the supplied locale
+        assertEquals(Locale.FRANCE, CLocale.getLocaleOrDefault(Locale.FRANCE));
+    }
+
+    @Test
     void testValueOf() {
         // Test converting some predefined locales
         assertEquals(Locale.FRANCE, CLocale.valueOf(Locale.FRANCE.toString()));
