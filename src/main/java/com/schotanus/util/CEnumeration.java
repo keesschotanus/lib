@@ -168,6 +168,23 @@ public final class CEnumeration {
     }
 
     /**
+     * Gets the CodeDescription of the supplied enumeratedConstant, using the name of the supplied enumerated constant as the
+     * code for the returned CodeDescription.
+     * @param <T> The type of the enumerated constant.
+     * @param enumeratedConstant The enumerated constant to get the CodeDescription for.
+     * @param code The code to get the localized description.
+     * @param locale Locale used to localize the description.
+     *  <br>When null is supplied the default locale is used.
+     * @return The localized CodedDescription of the supplied enumeratedConstant.
+     *  @throws NullPointerException When the supplied enumeratedConstant is null.
+     */
+    public static <T extends Enum<T>> CodeDescription<String> getCodeDescription(
+            final T enumeratedConstant, final String code, final Locale locale) {
+
+        return new CodeDescription<>(enumeratedConstant.name(), CEnumeration.getDescription(enumeratedConstant, code, locale));
+    }
+
+    /**
      * Gets the resource bundle associated with an enumeration.
      * @param enumeration The class of the enumeration.
      * @param locale The locale used for localization.

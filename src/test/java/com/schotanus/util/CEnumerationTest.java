@@ -40,6 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
     }
 
     @Test
+    void testGetDescriptionOfEnumeratedConstantUsingCode() {
+        // Test getting an existing property
+        assertEquals("One", CEnumeration.getDescription(
+                EnumWithPropertiesFile.ONE, String.valueOf(EnumWithPropertiesFile.ONE.getNumber()), null));
+    }
+
+    @Test
     void testGetDescriptions() {
          // Test getting code/descriptions of the planets
         final List<CodeDescription<String>> planets = CEnumeration.getCodeDescriptions(Planet.class, new Locale("nl"));
@@ -54,5 +61,14 @@ enum EnumWithoutPropertiesFile {
 }
 
 enum EnumWithPropertiesFile {
-    NoProperty
+    NoProperty(0), ONE(1);
+
+    final int code;
+    EnumWithPropertiesFile(int code) {
+        this.code = code;
+    }
+
+    int getNumber() {
+        return code;
+    }
 }
