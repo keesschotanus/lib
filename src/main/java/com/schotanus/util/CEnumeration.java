@@ -84,8 +84,7 @@ public final class CEnumeration {
         try {
             result = resourceBundle.getString(enumeration.getSimpleName());
         } catch (final MissingResourceException exception) {
-            logger.warn(String.format("Resource bundle: %s, is missing key: %s",
-                    enumeration.getName(), enumeration.getSimpleName()));
+            logger.atWarn().log("Resource bundle: {}, is missing key: {}", enumeration.getName(), enumeration.getSimpleName());
             result = enumeration.getSimpleName();
         }
 
@@ -124,8 +123,7 @@ public final class CEnumeration {
         try {
             return resourceBundle.getString(key);
         } catch (final MissingResourceException exception) {
-            logger.warn(String.format("Resource bundle: %s, is missing key: %s",
-                    enumeratedClass.getName(), enumeratedConstant.name()));
+            logger.atWarn().log("Resource bundle: {}, is missing key: {}", enumeratedClass.getName(), enumeratedConstant.name());
             throw exception;
         }
     }
@@ -182,7 +180,7 @@ public final class CEnumeration {
             return ResourceBundle.getBundle(
                     enumeration.getName(), CLocale.getLocaleOrDefault(locale), enumeration.getClassLoader());
         } catch (final MissingResourceException exception) {
-            logger.error(String.format("Enumeration: %s has no properties file!", enumeration.getName()));
+            logger.atError().log("Enumeration: {} has no properties file!", enumeration.getName());
             throw exception;
         }
     }
