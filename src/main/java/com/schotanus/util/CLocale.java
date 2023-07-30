@@ -21,6 +21,7 @@ package com.schotanus.util;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 
 /**
@@ -29,10 +30,41 @@ import java.util.Objects;
 public final class CLocale {
 
     /**
+     * Key to lookup: Illegal locale.<br>
+     * Arguments: <ul><li>locale</li></ul>.
+     */
+    public static final String MSG_ILLEGAL_LOCALE = "illegalLocale";
+
+    /**
+     * Key to lookup: Illegal language.<br>
+     * Arguments:
+     * <ul>
+     *   <li>locale</li>
+     *   <li>language</li>
+     * </ul>.
+     */
+    public static final String MSG_ILLEGAL_LANGUAGE = "illegalLanguage";
+
+    /**
+     * Key to lookup: Illegal country.<br>
+     * Arguments:
+     * <ul>
+     *   <li>locale</li>
+     *   <li>country</li>
+     * </ul>.
+     */
+    public static final String MSG_ILLEGAL_COUNTRY = "illegalCountry";
+
+    /**
      * The maximum number of elements in a locale we can parse.
      * The elements are language, country and variant.
      */
     private static final int MAX_ELEMENTS_IN_LOCALE = 3;
+
+    /**
+     * Resource bundle for this class.
+     */
+    private static final ResourceBundle resourceBundle = ResourceBundle.getBundle(CLocale.class.getName());
 
     /**
      * Private constructor prevents creation of an instance outside this class.
@@ -64,12 +96,14 @@ public final class CLocale {
 
         final String[] localeArray = locale.split("_");
         if (localeArray.length > MAX_ELEMENTS_IN_LOCALE) {
-            throw new IllegalArgumentException(String.format("Illegal locale: %s", locale));
+            throw new IllegalArgumentException(
+                    CResourceBundle.getLocalizedMessage(resourceBundle, MSG_ILLEGAL_LOCALE, locale));
         }
 
         final String language = localeArray[0].toLowerCase(Locale.getDefault());
         if (language.trim().length() != 2) {
-            throw new IllegalArgumentException(String.format("Illegal language: %s in locale: %s", language, locale));
+            throw new IllegalArgumentException(
+                    CResourceBundle.getLocalizedMessage(resourceBundle, MSG_ILLEGAL_LANGUAGE, locale, language));
         }
 
         String country = "";
@@ -78,7 +112,8 @@ public final class CLocale {
 
             // Country may be absent, but when present it must be a valid iso country
             if (country.length() != 0 && (country.length() != 2 || !isValidIsoCountry(country))) {
-                throw new IllegalArgumentException(String.format("Illegal country: %s, in locale: %s", country, locale));
+                throw new IllegalArgumentException(
+                        CResourceBundle.getLocalizedMessage(resourceBundle, MSG_ILLEGAL_COUNTRY, locale, country));
             }
         }
 

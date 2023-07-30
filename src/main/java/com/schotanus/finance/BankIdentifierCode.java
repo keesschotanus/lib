@@ -126,6 +126,9 @@ public class BankIdentifierCode implements Serializable {
      */
     private final String bic;
 
+    /**
+     * Resource bundle for this class.
+     */
     private static final ResourceBundle resourceBundle = ResourceBundle.getBundle(BankIdentifierCode.class.getName());
 
     /**

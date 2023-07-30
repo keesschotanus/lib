@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
+
 
 /**
  * Enumeration of ISO 3166 Countries.
@@ -1061,6 +1063,12 @@ public enum Iso3166Country {
     ZIMBABWE("ZW");
 
     /**
+     * Key to lookup: Illegal country code.<br>
+     * Arguments: <ul><li>country code</li></ul>.
+     */
+    public static final String MSG_ILLEGAL_COUNTRY_CODE = "illegalCountryCode";
+
+    /**
      * A map of alpha-2code to the corresponding country.
      */
     private static final Map<String, Iso3166Country> codeToCountry = new HashMap<>(Iso3166Country.values().length);
@@ -1088,6 +1096,11 @@ public enum Iso3166Country {
      * Date until this country is active or null when this country is currently active.
      */
     private LocalDate activeUntil;
+
+    /**
+     * Resource bundle for this class.
+     */
+    private static final ResourceBundle resourceBundle = ResourceBundle.getBundle(Iso3166Country.class.getName());
 
     /**
      * Constructs this Iso3166Country and stores the supplied alpha2Code.
@@ -1221,7 +1234,8 @@ public enum Iso3166Country {
     public static Iso3166Country getIso3166Country(final String alpha2Code) {
         final Iso3166Country country = codeToCountry.get(alpha2Code);
         if (country == null) {
-            throw new IllegalArgumentException("No country exists with code:" + alpha2Code);
+            throw new IllegalArgumentException(
+                    CResourceBundle.getLocalizedMessage(resourceBundle, MSG_ILLEGAL_COUNTRY_CODE, alpha2Code));
         }
 
         return country;
