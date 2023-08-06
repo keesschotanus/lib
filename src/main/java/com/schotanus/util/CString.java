@@ -58,4 +58,40 @@ public class CString {
         return input.chars().allMatch(singleChar -> Character.isAlphabetic(singleChar) || Character.isDigit(singleChar));
     }
 
+    /**
+     * Checks that the supplied input has matching open and close characters, where opening and closing characters may not be
+     * nested.<br>
+     * Example: <code></code>CString.checkMatchingCharacters("[abc]def[12]", '[', ']'); // Has matching brackets.</code><br>
+     * Example: <code></code>CString.checkMatchingCharacters("[abc]def[12]", '{', '}'); // No accolades, so no error.</code><br>
+     * @param input Input to check for matching opening and closing characters.
+     * @param open The opening character.
+     * @param close The closing character.
+     * @throws IllegalArgumentException When the open and close characters do not match.
+     */
+    public static void checkMatchingOpenAndCloseCharacters(final String input, final char open, final char close) {
+        boolean unmatchedOpeningCharFound = false;
+        for (int i = 0; i < input.length(); ++i) {
+            final char currentChar = input.charAt(i);
+            if (currentChar == open) {
+                if (unmatchedOpeningCharFound) {
+                    throw new IllegalArgumentException(
+                            String.format("Input: %s, has missing close character: %c", input, close));
+                }
+
+                unmatchedOpeningCharFound = true;
+            } else if (currentChar == close) {
+                if (!unmatchedOpeningCharFound) {
+                    throw new IllegalArgumentException(
+                            String.format("Input: %s, has missing open character: %c", input, open));
+                }
+
+                unmatchedOpeningCharFound = false;
+            }
+        }
+
+        if (unmatchedOpeningCharFound) {
+            throw new IllegalArgumentException(
+                    String.format("Input: %s, has missing close character: %c", input, close));
+        }
+    }
 }

@@ -20,7 +20,9 @@ package com.schotanus.util;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -52,4 +54,24 @@ class CStringTest {
         // An empty String is considered to be alphanumeric
         assertTrue(CString.isAlphanumeric(""));
     }
+
+    @Test
+    void testCheckMatchingOpenAndCloseCharacters() {
+        // Test with valid input
+        assertDoesNotThrow(() -> CString.checkMatchingOpenAndCloseCharacters("", '{', '}'));
+        assertDoesNotThrow(() -> CString.checkMatchingOpenAndCloseCharacters("{}", '{', '}'));
+        assertDoesNotThrow(() -> CString.checkMatchingOpenAndCloseCharacters("{a}", '{', '}'));
+        assertDoesNotThrow(() -> CString.checkMatchingOpenAndCloseCharacters("{} {a} {b} {c} {}", '{', '}'));
+        assertDoesNotThrow(() -> CString.checkMatchingOpenAndCloseCharacters("{] {a] {b] {c] {]", '{', ']'));
+
+        // Test with invalid input
+        assertThrows(IllegalArgumentException.class, () -> CString.checkMatchingOpenAndCloseCharacters("[12}", '[', ']'),
+                "Missing close character");
+        assertThrows(IllegalArgumentException.class, () -> CString.checkMatchingOpenAndCloseCharacters("[12}", '{', '}'),
+                "Missing open character");
+        assertThrows(IllegalArgumentException.class, () -> CString.checkMatchingOpenAndCloseCharacters("[[]]", '[', ']'),
+                "Illegal nesting");
+
+    }
+
 }
