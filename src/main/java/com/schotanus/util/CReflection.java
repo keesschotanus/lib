@@ -99,7 +99,7 @@ public final class CReflection {
                     && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())
                     && method.getParameterTypes().length == 0
-                    && !"void".equals(method.getReturnType().getName());
+                    && !method.getReturnType().equals(void.class);
 
     /**
      * Predicate to filter setters.<br>
@@ -110,7 +110,7 @@ public final class CReflection {
                 && Modifier.isPublic(method.getModifiers())
                 && !Modifier.isStatic(method.getModifiers())
                 && method.getParameterTypes().length == 1
-                && "void".equals(method.getReturnType().getName());
+                && method.getReturnType().equals(void.class);
 
     /**
      * Creates a predicate to filter on methods that are annotated with the supplied annotation.
@@ -374,7 +374,6 @@ public final class CReflection {
         Objects.requireNonNull(propertyName);
 
         final Method getMethod = propertyToGetMethod(object, propertyName);
-        getMethod.setAccessible(true);
         return getMethod.invoke(object);
     }
 
@@ -401,7 +400,6 @@ public final class CReflection {
                     + propertyName.substring(0, 1).toUpperCase(Locale.getDefault()) + propertyName.substring(1);
             try {
                 final Method method = object.getClass().getMethod(methodName, Integer.TYPE);
-                method.setAccessible(true);
                 return method.invoke(object, index);
             } catch (final NoSuchMethodException ignore) {
                 assert true; // Ignore and try a new method.
@@ -430,6 +428,7 @@ public final class CReflection {
             final Object propertyValue,
             final Class<?> propertyClass)
             throws ReflectiveOperationException {
+        Objects.requireNonNull(object);
         if (propertyClass == null && propertyValue == null) {
             throw new IllegalArgumentException("propertyValue and propertyClass can't both be null!");
         }

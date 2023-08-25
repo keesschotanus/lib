@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -57,16 +59,17 @@ class CReflectionTest {
     void testIsGetter() throws NoSuchMethodException {
         final List<Method> getters = CReflection.getDeclaredMethods(Laboratory.class, CReflection.isGetter);
 
-        assertEquals(2, getters.size());
+        assertEquals(3, getters.size());
         assertTrue(getters.contains(Laboratory.class.getMethod("getTestTubes")));
         assertTrue(getters.contains(Laboratory.class.getMethod("getName")));
+        assertTrue(getters.contains(Laboratory.class.getMethod("getOpen")));
     }
 
     @Test
     void testIsSetter() {
         final List<Method> setters = CReflection.getDeclaredMethods(Laboratory.class, CReflection.isSetter);
 
-        assertEquals(1, setters.size());
+        assertEquals(2, setters.size());
     }
 
     @Test
@@ -187,7 +190,7 @@ class CReflectionTest {
         assertEquals(5, CReflection.evaluatePropertyExpression(bean, "integerList[n]"));
 
         // Test getting an indexed property but the property is not indexed.
-        assertThrows(IllegalArgumentException.class, () -> CReflection.evaluatePropertyExpression(new Left(), "longProperty[1]"));
+        assertThrows(IllegalArgumentException.class, () -> CReflection.evaluatePropertyExpression(bean, "longProperty[1]"));
 
         // Test getting a property where the getter uses an index
         assertEquals(32L, CReflection.evaluatePropertyExpression(new Left(), "longPropertyWithIndex[16]"));
@@ -215,13 +218,84 @@ class CReflectionTest {
         assertThrows(NoSuchMethodException.class,
                 () -> CReflection.invokeGetMethod(new Left(), "nonExistingProperty", 13));
     }
+
+    /**
+     * Tests {@link CReflection#invokeSetMethod(Object, String, Object, Class)}.
+     */
+    @Test
+    void testInvokeSetMethod() throws ReflectiveOperationException {
+        final MedicalLaboratory medicalLaboratory = new MedicalLaboratory();
+
+        // Test invoking a setter and then checking the result using a getter
+        CReflection.invokeSetMethod(medicalLaboratory, "name", "lab", String.class);
+        assertEquals("lab", medicalLaboratory.getName());
+
+        // Test with null object
+        assertThrows(NullPointerException.class, () -> CReflection.invokeSetMethod(null, "name", "lab", String.class));
+
+        // Test with null property value and property class
+        assertThrows(IllegalArgumentException.class, () -> CReflection.invokeSetMethod(medicalLaboratory, "name", null, null));
+
+        // Test setting a null value
+        CReflection.invokeSetMethod(medicalLaboratory, "name", null, String.class);
+        assertNull(medicalLaboratory.getName());
+    }
+
+    /**
+     * Tests {@link CReflection#methodToProperty(String)}.
+     */
+    @Test
+    void testMethodToProperty() {
+        assertEquals("toBeOrNotToBe", CReflection.methodToProperty("getToBeOrNotToBe"));
+
+        // Test with illegal method
+        assertThrows(IllegalArgumentException.class, () -> CReflection.methodToProperty("abc"));
+    }
+
+    /**
+     * Tests {@link CReflection#clearAllMembers(Object)}.
+     */
+    @Test
+    void testClearAllMembers() {
+        final MedicalLaboratory medicalLaboratory = new MedicalLaboratory();
+        medicalLaboratory.setName("name");
+        CReflection.clearAllMembers(medicalLaboratory);
+        assertNull(medicalLaboratory.getName());
+
+        // Assert that member from super class has been cleared
+        assertFalse(medicalLaboratory.getOpen());
+    }
+
+    /**
+     * Tests {@link CReflection#getCallingMethod(String)}.
+     */
+    @Test
+    void testGetCallingMethod() {
+        // Test non-existing method (that can't have been called)
+        assertNull(CReflection.getCallingMethod("nonExistingMethod"));
+
+        // Test existing method
+        assertEquals("testGetCallingMethod", nestedMethod(), "Getting caller of the nested method (this method)");
+    }
+
+    /**
+     * Just a method called from {@link #testGetCallingMethod()} so that the calling method is one of our own
+     * (instead of one from JUnit).
+     * @return The name of the method that has called this method.
+     */
+    private String nestedMethod() {
+        return CReflection.getCallingMethod(CReflectionTest.class.getName() + ".nestedMethod");
+    }
+
+
 }
 
+@SuppressWarnings("ALL")
 class Laboratory {
     @ReflectionAnnotation(value = "Kind")
     public static final String KIND = "3";
 
-    private String level;
+    private final String level = "High";
 
     public static void cleanTestTubes() {
         assert true;
@@ -270,30 +344,35 @@ class Laboratory {
 
     // Not a setters since it returns a value
     public String setDescription(final String description) {
-        return "Something";
+        return description;
     }
 
     // Not a setters since it has too many parameters
     @ReflectionAnnotation(value = "nice")
     public String setDescription(final String description, final int count) {
-        return "Something";
+        return description + count;
     }
 
     // Not a setters since it is private
     private void setDescription(final int code) {
-        return;
+        setDescription(String.valueOf(code));
     }
 
     public void setCode(final String code) {
         assert code != null;
     }
+
+    private boolean open;
+    public boolean getOpen() { return this.open;}
+    public void setOpen(final boolean open) { this.open = open; }
 }
 
+@SuppressWarnings("ALL")
 class MedicalLaboratory extends Laboratory {
     private String name = "Medical Lab-1";
 
     public static void preventHazard(final String danger) {
-        assert true;
+        assert danger.length() > 1;
     }
 
     @Override
@@ -308,18 +387,20 @@ class MedicalLaboratory extends Laboratory {
     private void doIt() {
         assert true;
     }
+
 }
 
 /**
  * To test evaluation of property expressions.
  */
+@SuppressWarnings("ALL")
 class Left {
 
-    private String simpleStringProperty = "simpleString";
+    private final String simpleStringProperty = "simpleString";
 
-    private int primitiveIntProperty = 17;
+    private final int primitiveIntProperty = 17;
 
-    private Long longProperty = 19L;
+    private final Long longProperty = 19L;
 
     /**
      * A property to the right of the left property.
@@ -329,18 +410,18 @@ class Left {
     /**
      * An Integer array.
      */
-    private Integer [] integerArray = {0, 1, 2};
+    private final Integer [] integerArray = {0, 1, 2};
 
     /**
      * A two-dimensional Integer array.
      */
-    private Integer [][] twoDimensionalIntegerArray = {
+    private final Integer [][] twoDimensionalIntegerArray = {
             {0, 1, 2},
             {3, 4, 5},
             {6, 7, 8}
     };
 
-    private List<Integer> integerList = List.of(1, 2, 3, 4, 5);
+    private final List<Integer> integerList = List.of(1, 2, 3, 4, 5);
     public String getSimpleStringProperty() {
         return this.simpleStringProperty;
     }
@@ -388,11 +469,13 @@ class Left {
     public List<Integer> getIntegerList() {
         return integerList;
     }
+
 }
 
 /**
  * To test evaluation of property expressions.
  */
+@SuppressWarnings("ALL")
 class Right {
 
     /**
@@ -403,12 +486,12 @@ class Right {
     /**
      * Simple list.
      */
-    private List<Integer> simpleList = Arrays.asList(0, 1, 2);
+    private final List<Integer> simpleList = Arrays.asList(0, 1, 2);
 
     /**
      * Two-dimensional list.
      */
-    private List<List<Integer>> twoDimensionalList = new ArrayList<List<Integer>>();
+    private final List<List<Integer>> twoDimensionalList = new ArrayList<>();
 
     /**
      * Initializes the two-dimensional list.
@@ -453,228 +536,3 @@ class Right {
      */
     String value();
 }
-
-//
-//    /**
-//     * Tests {@link CReflection#invokeSetMethod(Object, String, Object, Class)}.
-//     * @throws Exception When one of the set...() methods could not be invoked.
-//     */
-//    @Test
-//    void testInvokeSetMethod() throws Exception {
-//        CReflection.invokeSetMethod(this, "stringProperty", "expected", null);
-//        assertEquals(
-//                "Did not handle: set...(String) properly!",
-//                "expected", stringProperty);
-//        CReflection.invokeSetMethod(
-//                this, "primitiveBooleanProperty", Boolean.FALSE, boolean.class);
-//        assertEquals(
-//                "Did not handle: set...(boolean) properly!",
-//                false, primitiveBooleanProperty);
-//        CReflection.invokeSetMethod(this, "objectBooleanProperty", Boolean.FALSE, null);
-//        assertEquals(
-//                "Did not handle: set...(Boolean) properly!",
-//                Boolean.FALSE, objectBooleanProperty);
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#invokeSetMethod(Object, String, Object, Class)}
-//     * with a private method that we should not be able to execute.
-//     * @throws ReflectiveOperationException Always.
-//     */
-//    @Test(expected = ReflectiveOperationException.class)
-//    void testInvokeSetMethodPrivate() throws ReflectiveOperationException {
-//        CReflection.invokeSetMethod(this, "privateMethod", "dummy", null);
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#methodToProperty(String)}.
-//     */
-//    @Test
-//    void testMethodToProperty() {
-//        assertEquals(
-//                "Did not handle: methodToProperty(\"setProperty)\"!",
-//                "property", CReflection.methodToProperty("setProperty"));
-//        assertEquals(
-//                "Did not handle: methodToProperty(\"setA)\"!",
-//                "property", CReflection.methodToProperty("setProperty"));
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#methodToProperty(String)}.
-//     */
-//    @Test(expected = IllegalArgumentException.class)
-//    void testMethodToPropertyWithIllegalMethodName() {
-//        CReflection.methodToProperty("illegalmethodname");
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#propertyToGetMethod(String)}.
-//     */
-//    @Test
-//    void testPropertyToGetMethod() {
-//        assertEquals("Did not handle: propertyToGetMethod() properly!",
-//                "getThing", CReflection.propertyToGetMethod("thing"));
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#propertyToSetMethod(String)}.
-//     */
-//    @Test
-//    void testPropertyToSetMethod() {
-//        assertEquals(
-//                "Did not handle: propertyToSetMethod() properly!",
-//                "setA", CReflection.propertyToSetMethod("a"));
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#propertyToGetMethod(Object, String)}.
-//     */
-//    @Test
-//    void testPropertyToGetMethodWithObject() {
-//        // Try simple String method
-//        try {
-//            CReflection.propertyToGetMethod(this, "stringProperty");
-//        } catch (final NoSuchMethodException exception) {
-//            fail("Could not locate getStringProperty()!");
-//        }
-//
-//        // Try a getter named is...().
-//        try {
-//            CReflection.propertyToGetMethod(this, "primitiveBooleanProperty");
-//        } catch (final NoSuchMethodException exception) {
-//            fail("Could not locate isPrimitiveBooleanProperty()!");
-//        }
-//
-//        // Try a getter named has...().
-//        try {
-//            CReflection.propertyToGetMethod(this, "objectBooleanProperty");
-//        } catch (final NoSuchMethodException exception) {
-//            fail("Could not locate hasObjectBooleanProperty()!");
-//        }
-//
-//        // Try a property for which no getter exists.
-//        try {
-//            CReflection.propertyToGetMethod(this, "nonExistingProperty");
-//            fail("Unexpectedly found a getter method for nonExistingProperty!");
-//        } catch (final NoSuchMethodException exception) {
-//            assert true; // This is expected
-//        }
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#getCallingMethod(String)}.
-//     */
-//    @Test
-//    void testGetCallingMethod() {
-//        // Test non existing method (that can't have been called)
-//        assertEquals("Non existing method", null, CReflection.getCallingMethod("nonExistingMethod"));
-//
-//        // Test existing method
-//        assertEquals("Getting caller of the nested method (this method)", "testGetCallingMethod", nestedMethod());
-//    }
-//
-//    /**
-//     * Just a method called from {@link #testGetCallingMethod(String)} so that the calling method is one of our own
-//     * (instead of one from JUnit).
-//     * @return The name of the method that has called this method.
-//     */
-//    private String nestedMethod() {
-//        return CReflection.getCallingMethod(CReflectionTest.class.getName() + ".nestedMethod");
-//    }
-//
-//    /**
-//     * Tests {@link CReflection#clearAllMembers(Object)}.
-//     */
-//    @Test
-//    void testClearAllMembers() {
-//
-//        final Person person = new Person();
-//        CReflection.clearAllMembers(person);
-//
-//        assertFalse("Primitive boolean has not been cleared", person.isMarried());
-//        assertNull("Wrapped boolean has not been cleared", person.hasCompanyCar());
-//        assertSame("Primitive int has not been cleared", person.getAge(), 0);
-//        assertNull("String object has not been cleared!", person.getName());
-//    }
-//
-//    /*
-//     * The methods below are no test methods but they are used to test executing
-//     * methods through reflection.
-//     */
-//
-//
-//    /**
-//     * Method that returns a String.
-//     * @return stringProperty.
-//     */
-//    String getStringProperty() {
-//        return stringProperty;
-//    }
-//
-//    /**
-//     * Method that accepts a String.
-//     * @param stringProperty String property.
-//     */
-//    void setStringProperty(final String stringProperty) {
-//        this.stringProperty = stringProperty;
-//    }
-//
-//    /**
-//     * Method that returns a String.
-//     * @param index Array index.
-//     * @return String representation of the supplied index.
-//     */
-//    String getStringArrayProperty(final int index) {
-//        return String.valueOf(index);
-//    }
-//
-//    /**
-//     * Method that returns a primitive boolean.
-//     * @return primitiveBooleanProperty.
-//     */
-//    boolean isPrimitiveBooleanProperty() {
-//        return primitiveBooleanProperty;
-//    }
-//
-//    /**
-//     * Method that accepts a boolean.
-//     * @param primitiveBooleanProperty boolean property.
-//     */
-//    void setPrimitiveBooleanProperty(final boolean primitiveBooleanProperty) {
-//        this.primitiveBooleanProperty = primitiveBooleanProperty;
-//    }
-//
-//    /**
-//     * Method that returns a Boolean object.
-//     * @return objectBooleanProperty.
-//     */
-//    Boolean hasObjectBooleanProperty() {
-//        return objectBooleanProperty;
-//    }
-//
-//    /**
-//     * Method that accepts a Boolean.
-//     * @param objectBooleanProperty Boolean property.
-//     */
-//    void setObjectBooleanProperty(final Boolean objectBooleanProperty) {
-//        this.objectBooleanProperty = objectBooleanProperty;
-//    }
-//
-//    /**
-//     * Method that is declared private so it can't be executed.
-//     * @return Empty String.
-//     */
-//    @SuppressWarnings("unused")
-//    private String getPrivateMethod() {
-//        return "";
-//    }
-//
-//    /**
-//     * Method that is declared private so it can't be executed.
-//     * @param value Mandatory parameter for set method.
-//     */
-//    @SuppressWarnings("unused")
-//    private void setPrivateMethod(final String value) {
-//        // Empty
-//    }
-//
