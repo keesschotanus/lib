@@ -11,3 +11,6 @@ This library is currently, almost empty, but new classes will be added in the fu
 
 Instead of using this library as a maven dependency,
 feel free to copy/paste anything you like.
+
+## Build
+```mvn clean install jacoco:report```
