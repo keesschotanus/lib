@@ -99,4 +99,29 @@ public class Fibonacci {
                 .map(Fibonacci::value);
     }
 
+    /**
+     * Determines if the supplied number represents a number that occurs in the row of Fibonacci numbers.<br>
+     * This method uses a test formulated by Ira Gessel:<br>
+     * The number n occurs in the row of Fibonacci numbers when 5n<sup>2</sup>&nbsp;+&nbsp;4 or 5n<sup>2</sup>&nbsp;-&nbsp;4
+     * is a perfect square.
+     * @return True when this CBigInteger represents a number that occurs in the row of Fibonacci numbers.
+     */
+    public static boolean isFibonacci(final BigInteger number) {
+        final BigInteger fiveNumberSquared = number.multiply(number).multiply(BigInteger.valueOf(5));
+        final BigInteger fiveNumberSquaredPlusFour = fiveNumberSquared.add(BigInteger.valueOf(4));
+        BigInteger squareRoot = CBigInteger.squareRoot(fiveNumberSquaredPlusFour);
+
+        boolean result = false;
+        if (squareRoot.multiply(squareRoot).equals(fiveNumberSquaredPlusFour)) {
+            result = true;
+        } else {
+            final BigInteger fiveNumberSquaredMinusFour = fiveNumberSquared.subtract(BigInteger.valueOf(4));
+            squareRoot = CBigInteger.squareRoot(fiveNumberSquaredMinusFour);
+            if (squareRoot.multiply(squareRoot).equals(fiveNumberSquaredMinusFour)) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
 }

@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -36,6 +38,20 @@ class FibonacciTest {
         // We should have 10 elements in the list and the last element must be 178.
         assertEquals(10, fibonacciSequence.size());
         assertEquals(BigInteger.valueOf(178), fibonacciSequence.get(fibonacciSequence.size() -1) );
+    }
+
+    /**
+     * Tests {@link Fibonacci#isFibonacci(BigInteger)}
+     */
+    @Test
+    void testIsFibonacci() {
+        final List<BigInteger> fibonacciSequence = Fibonacci.fibonacci().limit(30).toList();
+        // Verify that all numbers in the list are fibonacci numbers
+        fibonacciSequence.forEach(fibonacci -> assertTrue(Fibonacci.isFibonacci(fibonacci)));
+
+        final List<BigInteger> nonFibonacciNumbers = List.of(BigInteger.valueOf(4),BigInteger.valueOf(6),BigInteger.valueOf(9));
+        // Verify that none of the numbers in the list are fibonacci numbers
+        nonFibonacciNumbers.forEach(fibonacci -> assertFalse(Fibonacci.isFibonacci(fibonacci)));
     }
 
 }
