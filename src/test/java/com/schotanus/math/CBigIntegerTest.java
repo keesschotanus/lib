@@ -68,7 +68,8 @@ final class CBigIntegerTest {
       */
      @Test
      void testSquareRootWithNegativeNumber() {
-         assertThrows(ArithmeticException.class, () -> CBigInteger.squareRoot(BigInteger.valueOf(-1)));
+         final BigInteger minusOne = BigInteger.valueOf(-1);
+         assertThrows(ArithmeticException.class, () -> CBigInteger.squareRoot(minusOne));
      }
 
      /**
@@ -90,9 +91,10 @@ final class CBigIntegerTest {
     /**
      * Tests {@link CBigInteger#computeCollatzConjecture(BigInteger)} with negative input.
      */
+    @Test
     void testComputeCollatzConjectureWithNegativeInput() {
-        assertThrows(IllegalArgumentException.class,
-                () -> CBigInteger.computeCollatzConjecture(BigInteger.valueOf(Long.MIN_VALUE)));
+        final BigInteger negative = BigInteger.valueOf(Long.MIN_VALUE);
+        assertThrows(IllegalArgumentException.class, () -> CBigInteger.computeCollatzConjecture(negative));
     }
 
     /**

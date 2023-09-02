@@ -104,7 +104,7 @@ public class CBigInteger {
      * Let x<sub>n</sub> + 1 be the average of x<sub>n</sub> and <i>S</i> / x<sub>n</sub>.<br>
      * The information above is from:
      * <a href=http://en.wikipedia.org/wiki/Methods_of_computing_square_roots>Methods of computing square roots</a> on
-     * WikiPedia.<br>
+     * Wikipedia.<br>
      * This Babylonian method has been changed to work with BigInteger values without resorting to the usage of BigDecimal
      * objects.
      * @return Approximate root of the supplied number.<br>
@@ -187,14 +187,12 @@ public class CBigInteger {
 
         BigInteger currentValue = number;
         while (!currentValue.equals(BigInteger.ONE)) {
-            if (currentValue.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
-                currentValue = currentValue.divide(BigInteger.TWO);
-            } else {
+            if (!currentValue.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
                 currentValue = currentValue.multiply(THREE).add(BigInteger.ONE);
                 result.add(currentValue);
                 // At this point we must have an even number, so divide by 2.
-                currentValue = currentValue.divide(BigInteger.TWO);
             }
+            currentValue = currentValue.divide(BigInteger.TWO);
             result.add(currentValue);
         }
 
