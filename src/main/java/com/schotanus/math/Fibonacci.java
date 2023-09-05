@@ -109,14 +109,14 @@ public class Fibonacci {
     public static boolean isFibonacci(final BigInteger number) {
         final BigInteger fiveNumberSquared = number.multiply(number).multiply(BigInteger.valueOf(5));
         final BigInteger fiveNumberSquaredPlusFour = fiveNumberSquared.add(BigInteger.valueOf(4));
-        BigInteger squareRoot = CBigInteger.squareRoot(fiveNumberSquaredPlusFour);
+        BigInteger squareRoot = fiveNumberSquaredPlusFour.sqrt();
 
         boolean result = false;
         if (squareRoot.multiply(squareRoot).equals(fiveNumberSquaredPlusFour)) {
             result = true;
         } else {
             final BigInteger fiveNumberSquaredMinusFour = fiveNumberSquared.subtract(BigInteger.valueOf(4));
-            squareRoot = CBigInteger.squareRoot(fiveNumberSquaredMinusFour);
+            squareRoot = fiveNumberSquaredMinusFour.sqrt();
             if (squareRoot.multiply(squareRoot).equals(fiveNumberSquaredMinusFour)) {
                 result = true;
             }
