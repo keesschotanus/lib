@@ -19,6 +19,9 @@ package com.schotanus.math;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,6 +77,13 @@ final class CLongTest {
         assertTrue(CLong.isPrime(11L));
         assertFalse(CLong.isPrime(12L));
         assertTrue(CLong.isPrime(13L));
+
+        // Test some larger numbers to avoid lookup in the table of prime numbers
+        assertTrue(CLong.isPrime(33_331));
+        assertTrue(CLong.isPrime(333_331));
+        assertTrue(CLong.isPrime(3_333_331));
+        assertTrue(CLong.isPrime(33_333_331));
+        assertFalse(CLong.isPrime(333_333_331));
     }
 
     /**
@@ -155,4 +165,23 @@ final class CLongTest {
         assertThrows(IllegalArgumentException.class, () -> CLong.roundUp(1, -1));
     }
 
+    /**
+     * Tests {@link CLong#factorize(long)}.
+     */
+    @Test
+    void testFactorize() {
+        // Try with small value that force usage of the cached prime numbers
+        final List<PrimeFactor> expectedPrimeFactorsOf121 = List.of(new PrimeFactor(BigInteger.valueOf(11),2));
+        final List<PrimeFactor> primeFactorsOf121 = CLong.factorize(121L);
+        assertEquals(expectedPrimeFactorsOf121, primeFactorsOf121);
+
+        // Try with a large number to make sure that the result is actually computed, as opposed to being cached
+        final List<PrimeFactor> expectedPrimeFactorsOf987654321 = List.of(
+                new PrimeFactor(BigInteger.valueOf(3L),2),
+                new PrimeFactor(BigInteger.valueOf(17L),2),
+                new PrimeFactor(BigInteger.valueOf(379721L),1)
+        );
+        final List<PrimeFactor> primeFactorsOf987654321 = CLong.factorize(987654321L);
+        assertEquals(expectedPrimeFactorsOf987654321, primeFactorsOf987654321);
+    }
 }
