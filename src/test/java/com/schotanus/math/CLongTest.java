@@ -170,6 +170,12 @@ final class CLongTest {
      */
     @Test
     void testFactorize() {
+        // Try with 2
+        final List<PrimeFactor> expectedPrimeFactorsOf2 = List.of(new PrimeFactor(BigInteger.TWO,1));
+        final List<PrimeFactor> primeFactorsOf2 = CLong.factorize(2L);
+        assertEquals(expectedPrimeFactorsOf2, primeFactorsOf2);
+
+
         // Try with small value that force usage of the cached prime numbers
         final List<PrimeFactor> expectedPrimeFactorsOf121 = List.of(new PrimeFactor(BigInteger.valueOf(11),2));
         final List<PrimeFactor> primeFactorsOf121 = CLong.factorize(121L);
@@ -184,4 +190,13 @@ final class CLongTest {
         final List<PrimeFactor> primeFactorsOf987654321 = CLong.factorize(987654321L);
         assertEquals(expectedPrimeFactorsOf987654321, primeFactorsOf987654321);
     }
+
+    /**
+     * Tests {@link CLong#factorize(long)} with illegal input.
+     */
+    @Test
+    void testFactorizeWithIllegalInput() {
+        assertThrows(IllegalArgumentException.class, () -> CLong.factorize(1));
+    }
+
 }

@@ -257,12 +257,14 @@ public final class CLong {
             throw new IllegalArgumentException("Factorization needs a value larger than one, but is:" + value);
         }
 
+        final long lastFactor = (long)Math.sqrt(value);
+
         /*
          * Try all the prime factors from our array of prime numbers
          */
         final List<PrimeFactor> primeFactors = new ArrayList<>();
         long remainder = value;
-        for (int index = 0; remainder != 1 && index < primeNumbers.length; ++index) {
+        for (int index = 0; remainder != 1 && index < primeNumbers.length && primeNumbers[index] <= lastFactor; ++index) {
             remainder = factorize(primeFactors, remainder, primeNumbers[index]);
         }
 
@@ -270,8 +272,7 @@ public final class CLong {
          * If we are still not done, try every odd number after the last prime number in our list
          */
         if (remainder != 1) {
-            final long lastFactor = (long)Math.sqrt(value);
-            for (long factor = primeNumbers[primeNumbers.length - 1] + 2; remainder != 1 && factor < lastFactor; factor += 2) {
+            for (long factor = primeNumbers[primeNumbers.length - 1] + 2; remainder != 1 && factor <= lastFactor; factor += 2) {
                 remainder = factorize(primeFactors, remainder, factor);
             }
         }
