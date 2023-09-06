@@ -59,7 +59,7 @@ public class CBigInteger {
             isPrime = false;
         } else {
             isPrime = true;
-            final BigInteger root = squareRoot(number);
+            final BigInteger root = number.sqrt();
             for (BigInteger bigInteger = THREE;
                  bigInteger.compareTo(root) <= 0;
                  bigInteger = bigInteger.add(BigInteger.TWO)) {
@@ -92,76 +92,6 @@ public class CBigInteger {
         }
 
         return factorial;
-    }
-
-    /**
-     * Computes the square root of the supplied number.<br>
-     * This method uses the Babylonian method.
-     * This method can be derived from Newton's method but the Babylonian method is older.<br>
-     * Mathematically it works like this:<br>
-     * Assume the root of <i>S</i> needs to be calculated.<br>
-     * Start with an arbitrary positive number as close to the root of <i>S</i> as possible.<br>
-     * Let x<sub>n</sub> + 1 be the average of x<sub>n</sub> and <i>S</i> / x<sub>n</sub>.<br>
-     * The information above is from:
-     * <a href=http://en.wikipedia.org/wiki/Methods_of_computing_square_roots>Methods of computing square roots</a> on
-     * Wikipedia.<br>
-     * This Babylonian method has been changed to work with BigInteger values without resorting to the usage of BigDecimal
-     * objects.
-     * @return Approximate root of the supplied number.<br>
-     * The returned number is guaranteed to be the closest integer root.
-     * @throws ArithmeticException When this object has a negative number.
-     */
-    public static BigInteger squareRoot(final BigInteger number) throws ArithmeticException{
-        if (number.signum() == -1) {
-            throw new ArithmeticException("Can't compute the square root of negative number:" + number);
-        } else if (number.signum() == 0) {
-            return BigInteger.ZERO;
-        }
-
-        BigInteger previousApproximation;
-        BigInteger currentApproximation;
-
-        // Difference between the two approximations
-        BigInteger difference;
-
-        /*
-         * Create the initial guess.
-         * When this big integer is larger than will fit in a double, the largest long number is used,
-         * else we use the square root of the double number as the initial guess.
-         */
-        final double doubleValue = number.doubleValue();
-        if (Double.POSITIVE_INFINITY == doubleValue) {
-            currentApproximation = BigInteger.valueOf(Long.MAX_VALUE);
-        } else {
-            currentApproximation = BigInteger.valueOf((long)Math.sqrt(doubleValue));
-        }
-
-        do {
-            previousApproximation = currentApproximation;
-            currentApproximation = number.divide(previousApproximation);
-            currentApproximation = currentApproximation.add(previousApproximation);
-            currentApproximation = currentApproximation.divide(BigInteger.TWO);
-
-            difference = previousApproximation.subtract(currentApproximation).abs();
-        } while (difference.compareTo(BigInteger.ONE) > 0);
-
-        /*
-         * The current and previous approximations are either:
-         * - equal
-         * - or differ by one.
-         * When equal we increment the current approximation by one.
-         * The algorithm above uses integer division and that comes down to rounding down.
-         * 7 / 2 for example is 3. The answer could be one off!
-         *
-         * We now have two approximations, and we compute which one is closest to the answer.
-         */
-        if (currentApproximation.equals(previousApproximation)) {
-            currentApproximation = currentApproximation.add(BigInteger.ONE);
-        }
-        final BigInteger currentDifference = currentApproximation.multiply(currentApproximation).subtract(number).abs();
-        final BigInteger previousDifference = previousApproximation.multiply(previousApproximation).subtract(number).abs();
-
-        return currentDifference.compareTo(previousDifference) < 1 ? currentApproximation : previousApproximation;
     }
 
     /**
@@ -199,4 +129,67 @@ public class CBigInteger {
         return result;
     }
 
+    /**
+     * Factorizes the supplied BigInteger number into its prime factors.<br>
+     * Note: This method is really slow and has to be optimized.
+     * Consider using {@link CLong#factorize(long)} for cases where computations using log values are sufficient.
+     * On my machine factorizing the first million numbers takes 275ms using longs, using BigIntegers it takes 6022ms.
+     * @param number The number to factorize.
+     * @return A list of prime factors.
+     * @throws IllegalArgumentException When the supplied number is &lt; 2.
+     * @throws NullPointerException When the supplied number is null.
+     * @see CLong#factorize(long)
+     */
+    public static List<PrimeFactor> factorize(final BigInteger number) {
+        if (number.compareTo(BigInteger.TWO) < 0) {
+            throw new IllegalArgumentException("Factorization needs a number larger than one, but is:" + number);
+        }
+
+        final List<PrimeFactor> primeFactors = new ArrayList<>();
+
+        final BigInteger lastFactor = number.sqrt();
+        BigInteger factor = BigInteger.TWO;
+        BigInteger remainder = factorize(primeFactors, number, factor);
+        for (factor = BigInteger.valueOf(3); factor.compareTo(lastFactor) <= 0 && remainder.compareTo(BigInteger.ONE) != 0;
+             factor = factor.add(BigInteger.TWO)) {
+            remainder = factorize(primeFactors, remainder, factor);
+        }
+
+        if (remainder.compareTo(BigInteger.ONE) != 0) {
+            primeFactors.add(new PrimeFactor(remainder, 1));
+        }
+
+        return primeFactors;
+    }
+
+    /**
+     * Determines whether the supplied BigInteger factor is a prime factor of the supplied number.<br>
+     * When the supplied factor is a factor of the supplied number, a prime factor is added to the list of prime factors.
+     * @param primeFactors The list of prime factors found so far.
+     * @param number The number to check.
+     * @param factor The factor to check whether it is a prime factor of the supplied number.
+     * @return When the supplied factor is no prime factor of the supplied number then the number is returned as is,
+     *  otherwise the number that remains after factoring out the supplied factor is returned.<br>
+     *  For example: number=45 and factor=2. Since 2 is no factor of 45, the number 45 is returned.
+     *  When the number=45 and the factor=3 then the number 45 / 3 / 3 =&gt; 5 is returned and 3 with an exponent of 2 is added
+     *  to the supplied ist of prime factors.
+     */
+    private static BigInteger factorize(
+            final List<PrimeFactor> primeFactors, final BigInteger number, final BigInteger factor) {
+        int exponent = 0;
+
+        BigInteger remainder = number;
+        BigInteger[] divAndMod = remainder.divideAndRemainder(factor);
+        while (divAndMod[1].compareTo(BigInteger.ZERO) == 0) {
+            ++exponent;
+            remainder = divAndMod[0];
+            divAndMod = remainder.divideAndRemainder(factor);
+        }
+
+        if (exponent != 0) {
+            primeFactors.add(new PrimeFactor(factor, exponent));
+        }
+
+        return remainder;
+    }
 }

@@ -63,31 +63,6 @@ final class CBigIntegerTest {
         assertEquals(BigInteger.valueOf(6), CBigInteger.factorial(BigInteger.valueOf(3)));
     }
 
-     /**
-      * Tests {@link CBigInteger#squareRoot(BigInteger)} with a negative number.
-      */
-     @Test
-     void testSquareRootWithNegativeNumber() {
-         final BigInteger minusOne = BigInteger.valueOf(-1);
-         assertThrows(ArithmeticException.class, () -> CBigInteger.squareRoot(minusOne));
-     }
-
-     /**
-      * Tests {@link CBigInteger#squareRoot(BigInteger)}.
-      */
-    @Test
-    void testSquareRoot() {
-        final int iterations = 1000;
-
-        for (int i = 0; i < iterations; ++i) {
-            final int answer = (int)Math.round(Math.sqrt(i));
-            assertEquals(BigInteger.valueOf(answer), CBigInteger.squareRoot(BigInteger.valueOf(i)));
-        }
-
-        // Test square root of maximum Long value
-        assertEquals(BigInteger.valueOf(3037000500L), CBigInteger.squareRoot(BigInteger.valueOf(Long.MAX_VALUE)));
-    }
-
     /**
      * Tests {@link CBigInteger#computeCollatzConjecture(BigInteger)} with negative input.
      */
@@ -123,4 +98,46 @@ final class CBigIntegerTest {
         Assert.assertEquals(BigInteger.ONE, resultOfThree.get(expectedLength - 1));
     }
 
-}
+     /**
+      * Tests {@link CBigInteger#factorial(BigInteger)}.
+      */
+     @Test
+     void testFactorize() {
+         // Try with 2
+         final List<PrimeFactor> expectedPrimeFactorsOf2 = List.of(new PrimeFactor(BigInteger.TWO,1));
+         assertEquals(expectedPrimeFactorsOf2, CBigInteger.factorize(BigInteger.TWO));
+
+
+         // Try with small value
+         final List<PrimeFactor> expectedPrimeFactorsOf121 = List.of(new PrimeFactor(BigInteger.valueOf(11),2));
+         assertEquals(expectedPrimeFactorsOf121, CBigInteger.factorize(BigInteger.valueOf(121L)));
+
+         // Try with a large number
+         final List<PrimeFactor> expectedPrimeFactorsOf987654321 = List.of(
+                 new PrimeFactor(BigInteger.valueOf(3L),2),
+                 new PrimeFactor(BigInteger.valueOf(17L),2),
+                 new PrimeFactor(BigInteger.valueOf(379721L),1)
+         );
+         assertEquals(expectedPrimeFactorsOf987654321, CBigInteger.factorize(BigInteger.valueOf(987654321L)));
+
+
+         // Try with a really large number that actually needs a BigInteger.
+         final BigInteger factorialOf15 = CBigInteger.factorial(BigInteger.valueOf(15));
+         final List<PrimeFactor> expectedPrimeFactorsOf1307674367999 = List.of(
+                 new PrimeFactor(BigInteger.valueOf(17L), 1),
+                 new PrimeFactor(BigInteger.valueOf(31L),2),
+                 new PrimeFactor(BigInteger.valueOf(53L),1),
+                 new PrimeFactor(BigInteger.valueOf(1510259L),1)
+         );
+         final BigInteger factorialOf15Minus1 = factorialOf15.subtract(BigInteger.ONE);
+         assertEquals(expectedPrimeFactorsOf1307674367999, CBigInteger.factorize(factorialOf15Minus1));
+     }
+
+     /**
+      * Tests {@link CLong#factorize(long)} with illegal input.
+      */
+     @Test
+     void testFactorizeWithIllegalInput() {
+         assertThrows(IllegalArgumentException.class, () -> CBigInteger.factorize(BigInteger.ONE));
+     }
+ }
