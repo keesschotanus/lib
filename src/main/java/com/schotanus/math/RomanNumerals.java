@@ -36,7 +36,7 @@ public enum RomanNumerals {
      * Constructs this RomanNumeral.
      * @param value The value of this RomanNumeral.
      */
-    private RomanNumerals(final int value) {
+    RomanNumerals(final int value) {
         this.value = value;
     }
 
