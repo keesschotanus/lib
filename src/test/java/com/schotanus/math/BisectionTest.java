@@ -36,23 +36,21 @@ final class BisectionTest {
     private final DoubleFunction<Double> function = x -> x * x - 2;
 
     /**
-     * Tests {@link Bisection#findRootUsingAccuracy(double)}.
+     * Tests {@link Bisection#findRootUsingAccuracy(FunctionInterval, double)}.
      */
     @Test
     void testComputeRootWithAccuracy() {
-        final Bisection rootFinder = new Bisection(new FunctionInterval(function, -1, 2));
         final double acceptedAccuracy = 0.000001D;
-        final double root = rootFinder.findRootUsingAccuracy(acceptedAccuracy);
+        final double root = Bisection.findRootUsingAccuracy(new FunctionInterval(function, -1, 2), acceptedAccuracy);
         assertTrue(Math.abs(root - Math.sqrt(2)) <= acceptedAccuracy);
     }
 
     /**
-     * Tests {@link Bisection#findRootUsingIterations(int)}.
+     * Tests {@link Bisection#findRootUsingIterations(FunctionInterval, int)}.
      */
     @Test
     void testComputeRootWithIterations() {
-        final Bisection rootFinder = new Bisection(new FunctionInterval(function, -1, 2));
-        final double root = rootFinder.findRootUsingIterations(20);
+        final double root = Bisection.findRootUsingIterations(new FunctionInterval(function, -1, 2), 20);
         assertTrue(Math.abs(root - Math.sqrt(2)) <= 0.000001D);
     }
 

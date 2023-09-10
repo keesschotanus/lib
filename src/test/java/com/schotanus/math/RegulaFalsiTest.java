@@ -37,26 +37,21 @@ final class RegulaFalsiTest {
     private final DoubleFunction<Double> function = x -> x * x -2;
 
     /**
-     * Tests {@link RegulaFalsi#findRootUsingAccuracy(double)}.
+     * Tests {@link RegulaFalsi#findRootUsingAccuracy(FunctionInterval, double)}.
      */
     @Test
     void testComputeRootWithAccuracy() {
-        final RegulaFalsi rootFinder = new RegulaFalsi(new FunctionInterval(function, -1, 2));
         final double acceptedAccuracy = 0.000001D;
-        final double root = rootFinder.findRootUsingAccuracy(acceptedAccuracy);
+        final double root = RegulaFalsi.findRootUsingAccuracy(new FunctionInterval(function, -1, 2), acceptedAccuracy);
         assertTrue(Math.abs(root - Math.sqrt(2)) <= acceptedAccuracy);
-
-
-
     }
 
     /**
-     * Tests {@link RegulaFalsi#findRootUsingIterations(long)}.
+     * Tests {@link RegulaFalsi#findRootUsingIterations(FunctionInterval, long)}.
      */
     @Test
     void testComputeRootWithIterations() {
-        final RegulaFalsi rootFinder = new RegulaFalsi(new FunctionInterval(function, -1, 2));
-        final double root = rootFinder.findRootUsingIterations(10);
+        final double root = RegulaFalsi.findRootUsingIterations(new FunctionInterval(function, -1, 2), 10);
         assertTrue(Math.abs(root - Math.sqrt(2)) <= 0.000001D);
     }
 

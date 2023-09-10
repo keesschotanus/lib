@@ -24,12 +24,12 @@ package com.schotanus.math;
  * To find the root of a function f, f should at least be continuous.<br>
  * More information on this topic can be found <a href="http://en.wikipedia.org/wiki/False_position">here</a>.
  */
-public final class RegulaFalsi extends RootFinder {
+public final class RegulaFalsi {
 
     /**
      * Maximum number of iterations to perform when using accuracy, before bailing out.
      */
-    public static final int MAX_ITERATIONS = 100;
+    private static final int MAX_ITERATIONS = 100;
 
     /**
      * Contains the sides of an interval.
@@ -37,26 +37,25 @@ public final class RegulaFalsi extends RootFinder {
     private enum IntervalSide { LEFT, RIGHT }
 
     /**
-     * Constructs this Root finding instance from the supplied function interval.
-     * @param interval The function interval.
+     * Private constructor, prevents creation of an instance outside this class.
      */
-    public RegulaFalsi(final FunctionInterval interval) {
-
-        super(interval);
-        // Determine the first point in the interval
-        interval.x((interval.fb() * interval.a() - interval.fa() * interval.b()) / (interval.fb() - interval.fa()));
+    private RegulaFalsi() {
+        assert true;
     }
 
     /**
-     * Finds a root with an accuracy equal or better than the supplied accuracy.<br>
+     * Finds the root of the supplied function and interval with the supplied accuracy.<br>
      * This method will not perform more than {@link #MAX_ITERATIONS} iterations to prevent this method from blocking,
      * for example when the supplied accuracy can never be reached.
+     * @param interval The function and interval.
      * @param accuracy The minimum accuracy.
-     * @return A root of the function.<br>
+     * @return The root of the supplied function and interval.<br>
      *  The returned root is guaranteed to be accurate to the supplied accuracy.
      * @throws ArithmeticException When more than {@link #MAX_ITERATIONS} are performed without finding a root.
      */
-    public double findRootUsingAccuracy(final double accuracy) {
+    public static double findRootUsingAccuracy(final FunctionInterval interval, final double accuracy) {
+        interval.x(computeX(interval));
+
         // Used to keep track of which side of the interval was adjusted last
         IntervalSide adjustedIntervalSide = null;
 
@@ -74,11 +73,13 @@ public final class RegulaFalsi extends RootFinder {
     }
 
     /**
-     * Finds a root within the supplied number of iterations.
+     * Finds the root of the supplied function and interval, using at most the supplied number of iterations.
      * @param iterations The maximum number of iterations.
-     * @return A root of the function.
+     * @return The root of the supplied function and interval.
      */
-    public double findRootUsingIterations(final long iterations) {
+    public static double findRootUsingIterations(final FunctionInterval interval, final long iterations) {
+        interval.x(computeX(interval));
+
         // Used to keep track of which side of the interval was adjusted last
         IntervalSide adjustedIntervalSide = null;
 
@@ -93,11 +94,11 @@ public final class RegulaFalsi extends RootFinder {
      * Adjusts the supplied interval by making it smaller and then computing a new value for x.<br>
      * Determines whether the root is between a and x or between x and b and adjusts the interval accordingly.
      * The net result is a smaller interval.
-     * @param interval The interval.
+     * @param interval The function and interval.
      * @param previouslyAdjustedSide The previously adjusted side (left or right) of the interval.
      * @return The side of the interval that has been adjusted.
      */
-    private IntervalSide adjustInterval(final FunctionInterval interval, final IntervalSide previouslyAdjustedSide) {
+    private static IntervalSide adjustInterval(final FunctionInterval interval, final IntervalSide previouslyAdjustedSide) {
         IntervalSide result;
         if (interval.fa() * interval.fx() > 0.0) {
             // Root is between x and b.
@@ -117,9 +118,17 @@ public final class RegulaFalsi extends RootFinder {
             result = IntervalSide.RIGHT;
         }
 
-        interval.x((interval.fb() * interval.a() - interval.fa() * interval.b())
-                / (interval.fb() - interval.fa()));
+        interval.x(computeX(interval));
 
         return result;
+    }
+
+    /**
+     * Coputes a new value for `x`.
+     * @param interval The function and interval.
+     * @return The new value for `x`.
+     */
+    private static double computeX(FunctionInterval interval) {
+        return ((interval.fb() * interval.a() - interval.fa() * interval.b()) / (interval.fb() - interval.fa()));
     }
 }
